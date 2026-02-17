@@ -1,0 +1,85 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+use crate::state::*;
+use crate::errors::*;
+use crate::events::*;
+
+#[derive(Accounts)]
+pub struct ApproveProposal<'info> {
+    pub human: Signer<'info>,
+
+    #[account(
+        seeds = [Vault::SEED_PREFIX, vault.human.as_ref(), vault.agent.as_ref()],
+        bump = vault.bump,
+        constraint = vault.human == human.key() @ VaultError::OnlyHuman,
+        constraint = !vault.paused @ VaultError::VaultPaused,
+    )]
+    pub vault: Account<'info, Vault>,
+
+    #[account(
+        mut,
+        seeds = [
+            Proposal::SEED_PREFIX,
+            vault.key().as_ref(),
+            proposal.proposal_id.to_le_bytes().as_ref(),
+        ],
+        bump = proposal.bump,
+        constraint = proposal.vault == vault.key(),
+        constraint = !proposal.executed @ VaultError::ProposalAlreadyExecuted,
+        constraint = !proposal.cancelled @ VaultError::ProposalAlreadyCancelled,
+    )]
+    pub proposal: Account<'info, Proposal>,
+
+    #[account(
+        mut,
+        constraint = vault_usdc_ata.key() == vault.vault_usdc_ata,
+    )]
+    pub vault_usdc_ata: Account<'info, TokenAccount>,
+
+    #[account(
+        mut,
+        constraint = recipient_ata.key() == proposal.recipient_ata,
+    )]
+    pub recipient_ata: Account<'info, TokenAccount>,
+
+    pub token_program: Program<'info, Token>,
+}
+
+pub fn handler(ctx: Context<ApproveProposal>) -> Result<()> {
+    let vault = &ctx.accounts.vault;
+    let proposal = &mut ctx.accounts.proposal;
+
+    // Execute transfer
+    let human_key = vault.human;
+    let agent_key = vault.agent;
+    let bump = vault.bump;
+    let seeds = &[
+        Vault::SEED_PREFIX,
+        human_key.as_ref(),
+        agent_key.as_ref(),
+        &[bump],
+    ];
+    let signer_seeds = &[&seeds[..]];
+
+    let cpi_ctx = CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        Transfer {
+            from: ctx.accounts.vault_usdc_ata.to_account_info(),
+            to: ctx.accounts.recipient_ata.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
+        },
+        signer_seeds,
+    );
+    token::transfer(cpi_ctx, proposal.amount)?;
+
+    proposal.executed = true;
+
+    emit!(ProposalApproved {
+        vault: vault.key(),
+        proposal_id: proposal.proposal_id,
+        recipient: proposal.recipient,
+        amount: proposal.amount,
+    });
+
+    Ok(())
+}

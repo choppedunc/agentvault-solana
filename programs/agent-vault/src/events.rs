@@ -1,0 +1,71 @@
+use anchor_lang::prelude::*;
+
+#[event]
+pub struct VaultInitialized {
+    pub vault: Pubkey,
+    pub human: Pubkey,
+    pub agent: Pubkey,
+    pub usdc_mint: Pubkey,
+}
+
+#[event]
+pub struct UsdcSent {
+    pub vault: Pubkey,
+    pub signer: Pubkey,
+    pub recipient: Pubkey,
+    pub amount: u64,
+    pub tier: u8,
+    pub whitelisted: bool,
+}
+
+#[event]
+pub struct ProposalCreated {
+    pub vault: Pubkey,
+    pub proposal_id: u64,
+    pub recipient: Pubkey,
+    pub amount: u64,
+    pub memo: String,
+}
+
+#[event]
+pub struct ProposalApproved {
+    pub vault: Pubkey,
+    pub proposal_id: u64,
+    pub recipient: Pubkey,
+    pub amount: u64,
+}
+
+#[event]
+pub struct ProposalCancelled {
+    pub vault: Pubkey,
+    pub proposal_id: u64,
+}
+
+#[event]
+pub struct TiersUpdated {
+    pub vault: Pubkey,
+    pub tier1_max: u64,
+    pub tier2_max: u64,
+}
+
+#[event]
+pub struct WhitelistAdded {
+    pub vault: Pubkey,
+    pub address: Pubkey,
+}
+
+#[event]
+pub struct WhitelistRemoved {
+    pub vault: Pubkey,
+    pub address: Pubkey,
+}
+
+#[event]
+pub struct VaultPausedEvent {
+    pub vault: Pubkey,
+}
+
+#[event]
+pub struct VaultUnpausedEvent {
+    pub vault: Pubkey,
+}

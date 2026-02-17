@@ -1,0 +1,110 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::{self, Token, TokenAccount, Transfer};
+use crate::state::*;
+use crate::errors::*;
+use crate::events::*;
+
+#[derive(Accounts)]
+pub struct SendUsdc<'info> {
+    pub signer: Signer<'info>,
+
+    #[account(
+        seeds = [Vault::SEED_PREFIX, vault.human.as_ref(), vault.agent.as_ref()],
+        bump = vault.bump,
+    )]
+    pub vault: Account<'info, Vault>,
+
+    #[account(
+        mut,
+        constraint = vault_usdc_ata.key() == vault.vault_usdc_ata,
+    )]
+    pub vault_usdc_ata: Account<'info, TokenAccount>,
+
+    #[account(mut)]
+    pub recipient_ata: Account<'info, TokenAccount>,
+
+    /// Optional whitelist entry PDA. If provided and valid, bypasses tier checks.
+    /// CHECK: Validated manually if present
+    pub whitelist_entry: Option<Account<'info, WhitelistEntry>>,
+
+    pub token_program: Program<'info, Token>,
+}
+
+pub fn handler(ctx: Context<SendUsdc>, amount: u64, is_emergency: bool) -> Result<()> {
+    require!(amount > 0, VaultError::ZeroAmount);
+
+    let vault = &ctx.accounts.vault;
+    let signer_key = ctx.accounts.signer.key();
+
+    let is_human = signer_key == vault.human;
+    let is_agent = signer_key == vault.agent;
+
+    // Must be human or agent
+    require!(is_human || is_agent, VaultError::OnlyAgentOrHuman);
+
+    let mut tier: u8 = 0;
+    let mut whitelisted = false;
+
+    if is_human {
+        // Human can always send, tier 0 (human override)
+        tier = 0;
+    } else {
+        // Agent flow
+        require!(!vault.paused, VaultError::VaultPaused);
+
+        // Check whitelist
+        if let Some(ref wl_entry) = ctx.accounts.whitelist_entry {
+            if wl_entry.vault == vault.key()
+                && wl_entry.address == ctx.accounts.recipient_ata.owner
+            {
+                whitelisted = true;
+                tier = 0;
+            }
+        }
+
+        if !whitelisted {
+            if amount <= vault.tier1_max {
+                tier = 1;
+            } else if amount <= vault.tier2_max {
+                require!(is_emergency, VaultError::NotEmergency);
+                tier = 2;
+            } else {
+                return err!(VaultError::TierTooHigh);
+            }
+        }
+    }
+
+    // Execute transfer using vault PDA as signer
+    let human_key = vault.human;
+    let agent_key = vault.agent;
+    let bump = vault.bump;
+    let seeds = &[
+        Vault::SEED_PREFIX,
+        human_key.as_ref(),
+        agent_key.as_ref(),
+        &[bump],
+    ];
+    let signer_seeds = &[&seeds[..]];
+
+    let cpi_ctx = CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(),
+        Transfer {
+            from: ctx.accounts.vault_usdc_ata.to_account_info(),
+            to: ctx.accounts.recipient_ata.to_account_info(),
+            authority: ctx.accounts.vault.to_account_info(),
+        },
+        signer_seeds,
+    );
+    token::transfer(cpi_ctx, amount)?;
+
+    emit!(UsdcSent {
+        vault: vault.key(),
+        signer: signer_key,
+        recipient: ctx.accounts.recipient_ata.owner,
+        amount,
+        tier,
+        whitelisted,
+    });
+
+    Ok(())
+}

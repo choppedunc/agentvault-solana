@@ -1,0 +1,71 @@
+use anchor_lang::prelude::*;
+use crate::state::*;
+use crate::errors::*;
+use crate::events::*;
+
+#[derive(Accounts)]
+pub struct Propose<'info> {
+    #[account(mut)]
+    pub agent: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [Vault::SEED_PREFIX, vault.human.as_ref(), vault.agent.as_ref()],
+        bump = vault.bump,
+        constraint = vault.agent == agent.key() @ VaultError::OnlyAgent,
+        constraint = !vault.paused @ VaultError::VaultPaused,
+    )]
+    pub vault: Account<'info, Vault>,
+
+    /// CHECK: Recipient wallet address
+    pub recipient: UncheckedAccount<'info>,
+
+    /// CHECK: Recipient's USDC ATA - validated by client
+    pub recipient_ata: UncheckedAccount<'info>,
+
+    #[account(
+        init,
+        payer = agent,
+        space = 8 + Proposal::INIT_SPACE,
+        seeds = [
+            Proposal::SEED_PREFIX,
+            vault.key().as_ref(),
+            vault.proposal_count.to_le_bytes().as_ref(),
+        ],
+        bump,
+    )]
+    pub proposal: Account<'info, Proposal>,
+
+    pub system_program: Program<'info, System>,
+}
+
+pub fn handler(ctx: Context<Propose>, amount: u64, memo: String) -> Result<()> {
+    require!(amount > 0, VaultError::ZeroAmount);
+    require!(memo.len() <= 128, VaultError::Overflow);
+
+    let vault = &mut ctx.accounts.vault;
+    let proposal_id = vault.proposal_count;
+    vault.proposal_count = vault.proposal_count.checked_add(1).ok_or(VaultError::Overflow)?;
+
+    let proposal = &mut ctx.accounts.proposal;
+    proposal.vault = vault.key();
+    proposal.proposal_id = proposal_id;
+    proposal.recipient = ctx.accounts.recipient.key();
+    proposal.recipient_ata = ctx.accounts.recipient_ata.key();
+    proposal.amount = amount;
+    proposal.proposed_at = Clock::get()?.unix_timestamp;
+    proposal.executed = false;
+    proposal.cancelled = false;
+    proposal.memo = memo.clone();
+    proposal.bump = ctx.bumps.proposal;
+
+    emit!(ProposalCreated {
+        vault: vault.key(),
+        proposal_id,
+        recipient: proposal.recipient,
+        amount,
+        memo,
+    });
+
+    Ok(())
+}

@@ -1,0 +1,24 @@
+[package]
+name = "agent-vault"
+version = "0.1.0"
+description = "AgentVault - Solana smart account for AI agents with tiered spending controls"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "agent_vault"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = "0.30.1"
+anchor-spl = { version = "0.30.1", features = ["token"] }
+
+# Pin blake3 below 1.8 to avoid edition2024 requirement (SBF toolchain uses Rust 1.79)
+blake3 = ">=1.3, <1.8"

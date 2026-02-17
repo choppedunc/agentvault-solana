@@ -1,0 +1,9 @@
+target/
+node_modules/
+skill/scripts/node_modules/
+skill/scripts/dist/
+.anchor/
+test-ledger/
+.env
+*.so
+Cargo.lock

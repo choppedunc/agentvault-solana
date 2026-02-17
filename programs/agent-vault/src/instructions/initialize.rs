@@ -1,0 +1,63 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::{Token, TokenAccount, Mint};
+use anchor_spl::associated_token::AssociatedToken;
+use crate::state::*;
+use crate::errors::*;
+use crate::events::*;
+
+#[derive(Accounts)]
+pub struct Initialize<'info> {
+    #[account(mut)]
+    pub human: Signer<'info>,
+
+    /// CHECK: Agent pubkey, doesn't need to sign initialization
+    pub agent: UncheckedAccount<'info>,
+
+    pub usdc_mint: Account<'info, Mint>,
+
+    #[account(
+        init,
+        payer = human,
+        space = 8 + Vault::INIT_SPACE,
+        seeds = [Vault::SEED_PREFIX, human.key().as_ref(), agent.key().as_ref()],
+        bump,
+    )]
+    pub vault: Account<'info, Vault>,
+
+    #[account(
+        init,
+        payer = human,
+        associated_token::mint = usdc_mint,
+        associated_token::authority = vault,
+    )]
+    pub vault_usdc_ata: Account<'info, TokenAccount>,
+
+    pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub rent: Sysvar<'info, Rent>,
+}
+
+pub fn handler(ctx: Context<Initialize>, tier1_max: u64, tier2_max: u64) -> Result<()> {
+    require!(tier1_max <= tier2_max, VaultError::InvalidThresholds);
+
+    let vault = &mut ctx.accounts.vault;
+    vault.human = ctx.accounts.human.key();
+    vault.agent = ctx.accounts.agent.key();
+    vault.usdc_mint = ctx.accounts.usdc_mint.key();
+    vault.vault_usdc_ata = ctx.accounts.vault_usdc_ata.key();
+    vault.tier1_max = tier1_max;
+    vault.tier2_max = tier2_max;
+    vault.paused = false;
+    vault.proposal_count = 0;
+    vault.bump = ctx.bumps.vault;
+
+    emit!(VaultInitialized {
+        vault: vault.key(),
+        human: vault.human,
+        agent: vault.agent,
+        usdc_mint: vault.usdc_mint,
+    });
+
+    Ok(())
+}
