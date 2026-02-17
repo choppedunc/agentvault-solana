@@ -1,5 +1,4 @@
 import { getProgram, getVaultAddress, getConnection, getAgentKeypair, getProgramId } from "./lib/client";
-import { validateConfig } from "./lib/config";
 import { usdcToRaw, formatUsdc } from "./lib/format";
 import { getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
@@ -16,8 +15,6 @@ async function main() {
   const amount = parseFloat(args[1]);
   const isEmergency = args.includes("--emergency");
   const rawAmount = usdcToRaw(amount);
-
-  validateConfig();
   const program = getProgram();
   const connection = getConnection();
   const vaultAddress = getVaultAddress();

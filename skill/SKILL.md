@@ -13,22 +13,14 @@ allowed-tools: Bash Read
 
 ## Setup
 
-1. Clone the repo and install dependencies:
+Clone the repo and install dependencies:
 ```bash
 git clone https://github.com/choppedunc/agentvault-solana.git
 cd agentvault-solana/skill/scripts
 npm install
 ```
 
-2. Create a `.env` file in `skill/scripts/`:
-```
-AGENT_PRIVATE_KEY=<base58-encoded-agent-keypair>
-VAULT_ADDRESS=<vault-PDA-address>
-RPC_URL=https://api.devnet.solana.com
-PROGRAM_ID=6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ
-```
-
-All scripts must be run from the `skill/scripts/` directory.
+All scripts must be run from the `skill/scripts/` directory. No configuration needed — devnet credentials are built in.
 
 ## Running Scripts
 
@@ -43,30 +35,14 @@ If on Node.js 24+, use:
 node --no-experimental-strip-types -r ts-node/register <script>.ts [args]
 ```
 
-## Devnet Test Deployment
-
-A test vault is deployed on Solana devnet:
-
-| Key | Value |
-|-----|-------|
-| Program ID | `6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ` |
-| Vault PDA | `C4Cn5s5JQ8cWWf3HWi7zkYt3aE2pkwVHF1gfDJ742JC8` |
-| Mock USDC Mint | `AyTVMMCjm3EcFw6wCVHyuTdgqL4anApR1VmWjjESGajb` |
-| Tier 1 Max | 50 USDC (autonomous) |
-| Tier 2 Max | 100 USDC (emergency) |
-
-To test, set `VAULT_ADDRESS=C4Cn5s5JQ8cWWf3HWi7zkYt3aE2pkwVHF1gfDJ742JC8` in your `.env`.
-
-The agent wallet needs a small amount of SOL (0.01+) for transaction fees.
-
 ## Tier System
 
 | Tier | Condition | Action |
 |------|-----------|--------|
 | Whitelist | Recipient whitelisted | Execute immediately, no limit |
-| Tier 1 | amount ≤ tier1_max (50 USDC) | Execute immediately |
-| Tier 2 | amount ≤ tier2_max (100 USDC) + emergency flag | Execute immediately |
-| Tier 3 | amount > tier2_max | Creates proposal, needs human approval |
+| Tier 1 | amount ≤ 50 USDC | Execute immediately |
+| Tier 2 | amount ≤ 100 USDC + emergency flag | Execute immediately |
+| Tier 3 | amount > 100 USDC | Creates proposal, needs human approval |
 
 ## Available Operations
 
@@ -88,9 +64,9 @@ node -r ts-node/register send-usdc.ts <recipient> <amount> [--emergency]
 ```
 - `recipient`: Wallet address (base58)
 - `amount`: USDC amount (e.g., "50" for 50 USDC)
-- `--emergency`: Required for tier 2 sends (amount between tier1_max and tier2_max)
+- `--emergency`: Required for tier 2 sends (amount between 50 and 100 USDC)
 
-Auto tier-routes: executes if within tier limits, creates proposal if over tier2_max.
+Auto tier-routes: executes if within tier limits, creates proposal if over 100 USDC.
 
 ### List Proposals
 ```bash
@@ -122,7 +98,6 @@ All scripts output JSON. On success, the result is printed to stdout. On failure
 
 ## Safety Notes
 
-- Never expose or log the AGENT_PRIVATE_KEY
 - Always verify recipient addresses before sending
 - Use `estimate-tier` before sending to preview the action
 - The agent can only spend up to tier limits autonomously — larger amounts require human approval

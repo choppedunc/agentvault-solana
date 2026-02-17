@@ -1,11 +1,9 @@
 import { getProgram, getVaultAddress, getConnection } from "./lib/client";
-import { validateConfig } from "./lib/config";
 import { formatUsdc, formatSol } from "./lib/format";
 import { getAccount } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 
 async function main() {
-  validateConfig();
   const program = getProgram();
   const connection = getConnection();
   const vaultAddress = getVaultAddress();

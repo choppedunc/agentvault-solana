@@ -1,5 +1,4 @@
 import { getProgram, getVaultAddress, getProgramId } from "./lib/client";
-import { validateConfig } from "./lib/config";
 import { formatUsdc } from "./lib/format";
 import { PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
@@ -10,8 +9,6 @@ async function main() {
     console.error(JSON.stringify({ error: "Usage: get-proposal.ts <proposal_id>" }));
     process.exit(1);
   }
-
-  validateConfig();
   const program = getProgram();
   const vaultAddress = getVaultAddress();
   const programId = getProgramId();

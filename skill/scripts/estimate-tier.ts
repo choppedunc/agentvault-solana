@@ -1,5 +1,4 @@
 import { getProgram, getVaultAddress } from "./lib/client";
-import { validateConfig } from "./lib/config";
 import { usdcToRaw, formatUsdc } from "./lib/format";
 
 async function main() {
@@ -11,8 +10,6 @@ async function main() {
 
   const amount = parseFloat(amountStr);
   const rawAmount = usdcToRaw(amount);
-
-  validateConfig();
   const program = getProgram();
   const vaultAddress = getVaultAddress();
   const vault = await (program.account as any).vault.fetch(vaultAddress);
