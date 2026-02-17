@@ -1,0 +1,376 @@
+{
+  "address": "6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ",
+  "metadata": {
+    "name": "agent_vault",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "initialize",
+      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
+      "accounts": [
+        { "name": "human", "writable": true, "signer": true },
+        { "name": "agent" },
+        { "name": "usdc_mint" },
+        { "name": "vault", "writable": true },
+        { "name": "vault_usdc_ata", "writable": true },
+        { "name": "system_program", "address": "11111111111111111111111111111111" },
+        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" },
+        { "name": "associated_token_program", "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL" },
+        { "name": "rent", "address": "SysvarRent111111111111111111111111111111111" }
+      ],
+      "args": [
+        { "name": "tier1_max", "type": "u64" },
+        { "name": "tier2_max", "type": "u64" }
+      ]
+    },
+    {
+      "name": "send_usdc",
+      "discriminator": [98, 238, 97, 218, 163, 10, 34, 222],
+      "accounts": [
+        { "name": "signer", "signer": true },
+        { "name": "vault" },
+        { "name": "vault_usdc_ata", "writable": true },
+        { "name": "recipient_ata", "writable": true },
+        { "name": "whitelist_entry", "optional": true },
+        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" },
+        { "name": "is_emergency", "type": "bool" }
+      ]
+    },
+    {
+      "name": "propose",
+      "discriminator": [93, 253, 82, 168, 118, 33, 102, 90],
+      "accounts": [
+        { "name": "agent", "writable": true, "signer": true },
+        { "name": "vault", "writable": true },
+        { "name": "recipient" },
+        { "name": "recipient_ata" },
+        { "name": "proposal", "writable": true },
+        { "name": "system_program", "address": "11111111111111111111111111111111" }
+      ],
+      "args": [
+        { "name": "amount", "type": "u64" },
+        { "name": "memo", "type": "string" }
+      ]
+    },
+    {
+      "name": "approve_proposal",
+      "discriminator": [136, 108, 102, 85, 98, 114, 7, 147],
+      "accounts": [
+        { "name": "human", "signer": true },
+        { "name": "vault" },
+        { "name": "proposal", "writable": true },
+        { "name": "vault_usdc_ata", "writable": true },
+        { "name": "recipient_ata", "writable": true },
+        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_proposal",
+      "discriminator": [106, 74, 128, 146, 19, 65, 39, 23],
+      "accounts": [
+        { "name": "human", "signer": true },
+        { "name": "vault" },
+        { "name": "proposal", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_proposal",
+      "discriminator": [213, 178, 139, 19, 50, 191, 82, 245],
+      "accounts": [
+        { "name": "agent", "writable": true, "signer": true },
+        { "name": "vault" },
+        { "name": "proposal", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "set_tiers",
+      "discriminator": [170, 131, 109, 175, 156, 214, 177, 121],
+      "accounts": [
+        { "name": "human", "signer": true },
+        { "name": "vault", "writable": true }
+      ],
+      "args": [
+        { "name": "tier1_max", "type": "u64" },
+        { "name": "tier2_max", "type": "u64" }
+      ]
+    },
+    {
+      "name": "add_whitelist",
+      "discriminator": [215, 46, 143, 176, 108, 113, 24, 1],
+      "accounts": [
+        { "name": "human", "writable": true, "signer": true },
+        { "name": "vault" },
+        { "name": "whitelist_entry", "writable": true },
+        { "name": "system_program", "address": "11111111111111111111111111111111" }
+      ],
+      "args": [
+        { "name": "address", "type": "pubkey" }
+      ]
+    },
+    {
+      "name": "remove_whitelist",
+      "discriminator": [148, 244, 73, 234, 131, 55, 247, 90],
+      "accounts": [
+        { "name": "human", "writable": true, "signer": true },
+        { "name": "vault" },
+        { "name": "whitelist_entry", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "pause",
+      "discriminator": [211, 22, 221, 251, 74, 121, 193, 47],
+      "accounts": [
+        { "name": "human", "signer": true },
+        { "name": "vault", "writable": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "unpause",
+      "discriminator": [169, 144, 4, 38, 10, 141, 188, 255],
+      "accounts": [
+        { "name": "human", "signer": true },
+        { "name": "vault", "writable": true }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Vault",
+      "discriminator": [211, 8, 232, 43, 2, 152, 117, 119]
+    },
+    {
+      "name": "Proposal",
+      "discriminator": [26, 94, 189, 187, 116, 136, 53, 33]
+    },
+    {
+      "name": "WhitelistEntry",
+      "discriminator": [51, 70, 173, 81, 219, 192, 234, 62]
+    }
+  ],
+  "events": [
+    {
+      "name": "VaultInitialized",
+      "discriminator": [180, 43, 207, 2, 18, 71, 3, 75]
+    },
+    {
+      "name": "UsdcSent",
+      "discriminator": [37, 28, 211, 122, 88, 89, 161, 19]
+    },
+    {
+      "name": "ProposalCreated",
+      "discriminator": [186, 8, 160, 108, 81, 13, 51, 206]
+    },
+    {
+      "name": "ProposalApproved",
+      "discriminator": [70, 49, 155, 228, 157, 43, 88, 49]
+    },
+    {
+      "name": "ProposalCancelled",
+      "discriminator": [253, 59, 104, 46, 129, 78, 9, 14]
+    },
+    {
+      "name": "TiersUpdated",
+      "discriminator": [149, 194, 233, 237, 201, 23, 37, 225]
+    },
+    {
+      "name": "WhitelistAdded",
+      "discriminator": [97, 233, 173, 159, 42, 22, 108, 250]
+    },
+    {
+      "name": "WhitelistRemoved",
+      "discriminator": [57, 55, 186, 142, 33, 197, 220, 71]
+    },
+    {
+      "name": "VaultPausedEvent",
+      "discriminator": [75, 189, 120, 167, 117, 229, 155, 60]
+    },
+    {
+      "name": "VaultUnpausedEvent",
+      "discriminator": [131, 193, 72, 96, 27, 110, 75, 199]
+    }
+  ],
+  "errors": [
+    { "code": 6000, "name": "OnlyHuman", "msg": "Only the human authority can perform this action" },
+    { "code": 6001, "name": "OnlyAgent", "msg": "Only the agent can perform this action" },
+    { "code": 6002, "name": "OnlyAgentOrHuman", "msg": "Only the agent or human can perform this action" },
+    { "code": 6003, "name": "VaultPaused", "msg": "Vault is paused" },
+    { "code": 6004, "name": "VaultNotPaused", "msg": "Vault is not paused" },
+    { "code": 6005, "name": "InvalidThresholds", "msg": "Invalid tier thresholds" },
+    { "code": 6006, "name": "ProposalAlreadyExecuted", "msg": "Proposal has already been executed" },
+    { "code": 6007, "name": "ProposalAlreadyCancelled", "msg": "Proposal has already been cancelled" },
+    { "code": 6008, "name": "TierTooHigh", "msg": "Amount exceeds tier limit" },
+    { "code": 6009, "name": "NotEmergency", "msg": "Not an emergency transfer" },
+    { "code": 6010, "name": "AlreadyWhitelisted", "msg": "Address is already whitelisted" },
+    { "code": 6011, "name": "ZeroAmount", "msg": "Amount must be greater than zero" },
+    { "code": 6012, "name": "Overflow", "msg": "Arithmetic overflow" }
+  ],
+  "types": [
+    {
+      "name": "Vault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "human", "type": "pubkey" },
+          { "name": "agent", "type": "pubkey" },
+          { "name": "usdc_mint", "type": "pubkey" },
+          { "name": "vault_usdc_ata", "type": "pubkey" },
+          { "name": "tier1_max", "type": "u64" },
+          { "name": "tier2_max", "type": "u64" },
+          { "name": "paused", "type": "bool" },
+          { "name": "proposal_count", "type": "u64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "Proposal",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "proposal_id", "type": "u64" },
+          { "name": "recipient", "type": "pubkey" },
+          { "name": "recipient_ata", "type": "pubkey" },
+          { "name": "amount", "type": "u64" },
+          { "name": "proposed_at", "type": "i64" },
+          { "name": "executed", "type": "bool" },
+          { "name": "cancelled", "type": "bool" },
+          { "name": "memo", "type": "string" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistEntry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "address", "type": "pubkey" },
+          { "name": "added_at", "type": "i64" },
+          { "name": "bump", "type": "u8" }
+        ]
+      }
+    },
+    {
+      "name": "VaultInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "human", "type": "pubkey" },
+          { "name": "agent", "type": "pubkey" },
+          { "name": "tier1_max", "type": "u64" },
+          { "name": "tier2_max", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "UsdcSent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "recipient", "type": "pubkey" },
+          { "name": "amount", "type": "u64" },
+          { "name": "is_emergency", "type": "bool" }
+        ]
+      }
+    },
+    {
+      "name": "ProposalCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "proposal_id", "type": "u64" },
+          { "name": "recipient", "type": "pubkey" },
+          { "name": "amount", "type": "u64" },
+          { "name": "memo", "type": "string" }
+        ]
+      }
+    },
+    {
+      "name": "ProposalApproved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "proposal_id", "type": "u64" },
+          { "name": "recipient", "type": "pubkey" },
+          { "name": "amount", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "ProposalCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "proposal_id", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "TiersUpdated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "tier1_max", "type": "u64" },
+          { "name": "tier2_max", "type": "u64" }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistAdded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "address", "type": "pubkey" }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistRemoved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" },
+          { "name": "address", "type": "pubkey" }
+        ]
+      }
+    },
+    {
+      "name": "VaultPausedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" }
+        ]
+      }
+    },
+    {
+      "name": "VaultUnpausedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "vault", "type": "pubkey" }
+        ]
+      }
+    }
+  ]
+}

@@ -1,15 +1,18 @@
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import { AnchorProvider, Program, Wallet } from "@coral-xyz/anchor";
-import * as bs58 from "bs58";
+import bs58 from "bs58";
 import { config } from "./config";
-import idl from "../../../target/idl/agent_vault.json";
+import * as fs from "fs";
+import * as path from "path";
+
+const idl = JSON.parse(fs.readFileSync(path.join(__dirname, "../idl/agent_vault.json"), "utf-8"));
 
 export function getConnection(): Connection {
   return new Connection(config.rpcUrl, "confirmed");
 }
 
 export function getAgentKeypair(): Keypair {
-  return Keypair.fromSecretKey(bs58.default.decode(config.agentPrivateKey));
+  return Keypair.fromSecretKey(bs58.decode(config.agentPrivateKey));
 }
 
 export function getVaultAddress(): PublicKey {
