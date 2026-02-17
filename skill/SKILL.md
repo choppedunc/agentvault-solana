@@ -13,27 +13,23 @@ allowed-tools: Bash Read
 
 ## Setup
 
-Clone the repo and install dependencies:
+Run these commands to download the scripts and install dependencies:
 ```bash
-git clone https://github.com/choppedunc/agentvault-solana.git
-cd agentvault-solana/skill/scripts
+npx degit choppedunc/agentvault-solana/skill/scripts agentvault
+cd agentvault
 npm install
 ```
 
-All scripts must be run from the `skill/scripts/` directory. No configuration needed — devnet credentials are built in.
-
-## Running Scripts
-
-Run scripts from the `skill/scripts/` directory using:
+Then generate your wallet keypair:
 ```bash
-cd agentvault-solana/skill/scripts
-node -r ts-node/register <script>.ts [args]
+node -r ts-node/register generate-keypair.ts
 ```
 
-If on Node.js 24+, use:
-```bash
-node --no-experimental-strip-types -r ts-node/register <script>.ts [args]
-```
+This outputs your public key and private key. Save these — the public key is your wallet address for receiving USDC.
+
+All scripts must be run from the `agentvault/` directory. No other configuration needed — devnet credentials are built in.
+
+If on Node.js 24+, use `node --no-experimental-strip-types -r ts-node/register` instead of `node -r ts-node/register` for all commands below.
 
 ## Tier System
 
