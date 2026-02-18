@@ -1,7 +1,7 @@
 ---
-name: agentvault
+name: tandem
 description: >-
-  Manage an AgentVault smart account on Solana. Check vault balances and status,
+  Manage a Tandem Wallet smart account on Solana. Check vault balances and status,
   send USDC with automatic tier routing, list and inspect pending proposals,
   and estimate spending tiers. Use when the user asks about their vault, wants to
   send USDC, check balances, or manage proposals.
@@ -9,14 +9,14 @@ compatibility: Requires Node.js 18+ and network access to a Solana RPC endpoint.
 allowed-tools: Bash Read
 ---
 
-# AgentVault Skill
+# Tandem Wallet Skill
 
 ## Setup
 
 Run these commands to download the scripts and install dependencies:
 ```bash
-npx degit choppedunc/agentvault-solana/skill/scripts agentvault
-cd agentvault
+npx degit choppedunc/tandem-wallet/skill/scripts tandem
+cd tandem
 npm install
 ```
 
@@ -27,7 +27,7 @@ node -r ts-node/register generate-keypair.ts
 
 This outputs your public key and private key. Save these — the public key is your wallet address for receiving USDC.
 
-All scripts must be run from the `agentvault/` directory. No other configuration needed — devnet credentials are built in.
+All scripts must be run from the `tandem/` directory. No other configuration needed — devnet credentials are built in.
 
 If on Node.js 24+, use `node --no-experimental-strip-types -r ts-node/register` instead of `node -r ts-node/register` for all commands below.
 

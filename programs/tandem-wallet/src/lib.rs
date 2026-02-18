@@ -11,7 +11,7 @@ use instructions::*;
 declare_id!("6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ");
 
 #[program]
-pub mod agent_vault {
+pub mod tandem_wallet {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>, tier1_max: u64, tier2_max: u64) -> Result<()> {

@@ -1,12 +1,12 @@
 [package]
-name = "agent-vault"
+name = "tandem-wallet"
 version = "0.1.0"
-description = "AgentVault - Solana smart account for AI agents with tiered spending controls"
+description = "Tandem Wallet - Solana smart account for AI agents with tiered spending controls"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "agent_vault"
+name = "tandem_wallet"
 
 [features]
 no-entrypoint = []

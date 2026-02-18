@@ -5,7 +5,7 @@ import { config } from "./config";
 import * as fs from "fs";
 import * as path from "path";
 
-const idl = JSON.parse(fs.readFileSync(path.join(__dirname, "../idl/agent_vault.json"), "utf-8"));
+const idl = JSON.parse(fs.readFileSync(path.join(__dirname, "../idl/tandem_wallet.json"), "utf-8"));
 
 export function getConnection(): Connection {
   return new Connection(config.rpcUrl, "confirmed");

@@ -3,10 +3,10 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-agent_vault = "6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ"
+tandem_wallet = "6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ"
 
 [programs.devnet]
-agent_vault = "6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ"
+tandem_wallet = "6L2hon3xSV9saeaGG7cgFG298JGW4vf9jDtF5xg8E6pZ"
 
 [registry]
 url = "https://api.apr.dev"

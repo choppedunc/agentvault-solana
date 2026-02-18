@@ -1,8 +1,8 @@
-# AgentVault Reference
+# Tandem Wallet Reference
 
 ## Program Architecture
 
-AgentVault is a PDA-based smart account on Solana that gives AI agents controlled access to USDC funds.
+Tandem Wallet is a PDA-based smart account on Solana that gives AI agents controlled access to USDC funds.
 
 ### Account Structure
 

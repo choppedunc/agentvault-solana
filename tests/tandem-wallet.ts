@@ -24,9 +24,9 @@ import { fileURLToPath } from "url";
 // Load IDL directly since generated types may not match
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const idl = JSON.parse(fs.readFileSync(path.join(__dirname, "../target/idl/agent_vault.json"), "utf-8"));
+const idl = JSON.parse(fs.readFileSync(path.join(__dirname, "../target/idl/tandem_wallet.json"), "utf-8"));
 
-describe("agent-vault", () => {
+describe("tandem-wallet", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
