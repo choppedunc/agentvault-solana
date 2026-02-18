@@ -10,6 +10,7 @@ const REWARD_PRECISION: u128 = 1_000_000_000_000; // 1e12
 pub fn calculate_and_transfer_fee<'info>(
     amount: u64,
     fee_bps: u16,
+    total_staked: u64,
     vault_usdc_ata: &Account<'info, TokenAccount>,
     staker_reward_ata: &Account<'info, TokenAccount>,
     buyback_ata: &Account<'info, TokenAccount>,
@@ -27,8 +28,13 @@ pub fn calculate_and_transfer_fee<'info>(
         return Ok(0);
     }
 
-    let staker_fee = fee / 2;
-    let buyback_fee = fee - staker_fee;
+    // If nobody is staked, send 100% to buyback to prevent orphaned rewards
+    let (staker_fee, buyback_fee) = if total_staked > 0 {
+        let sf = fee / 2;
+        (sf, fee - sf)
+    } else {
+        (0, fee)
+    };
 
     // Transfer staker portion
     if staker_fee > 0 {

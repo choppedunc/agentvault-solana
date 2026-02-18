@@ -123,6 +123,7 @@ pub fn handler(ctx: Context<SendUsdc>, amount: u64, is_emergency: bool) -> Resul
     let fee = helpers::calculate_and_transfer_fee(
         amount,
         ctx.accounts.protocol_config.fee_bps,
+        ctx.accounts.protocol_config.total_staked,
         &ctx.accounts.vault_usdc_ata,
         &ctx.accounts.staker_reward_ata,
         &ctx.accounts.buyback_ata,
