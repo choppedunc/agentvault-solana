@@ -8,212 +8,1015 @@
   "instructions": [
     {
       "name": "initialize",
-      "discriminator": [175, 175, 109, 31, 13, 152, 155, 237],
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
       "accounts": [
-        { "name": "human", "writable": true, "signer": true },
-        { "name": "agent" },
-        { "name": "usdc_mint" },
-        { "name": "vault", "writable": true },
-        { "name": "vault_usdc_ata", "writable": true },
-        { "name": "system_program", "address": "11111111111111111111111111111111" },
-        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" },
-        { "name": "associated_token_program", "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL" },
-        { "name": "rent", "address": "SysvarRent111111111111111111111111111111111" }
+        {
+          "name": "human",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "agent"
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "vault_usdc_ata",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
       ],
       "args": [
-        { "name": "tier1_max", "type": "u64" },
-        { "name": "tier2_max", "type": "u64" }
+        {
+          "name": "tier1_max",
+          "type": "u64"
+        },
+        {
+          "name": "tier2_max",
+          "type": "u64"
+        }
       ]
     },
     {
       "name": "send_usdc",
-      "discriminator": [98, 238, 97, 218, 163, 10, 34, 222],
+      "discriminator": [
+        98,
+        238,
+        97,
+        218,
+        163,
+        10,
+        34,
+        222
+      ],
       "accounts": [
-        { "name": "signer", "signer": true },
-        { "name": "vault" },
-        { "name": "vault_usdc_ata", "writable": true },
-        { "name": "recipient_ata", "writable": true },
-        { "name": "whitelist_entry", "optional": true },
-        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }
+        {
+          "name": "signer",
+          "signer": true
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "vault_usdc_ata",
+          "writable": true
+        },
+        {
+          "name": "recipient_ata",
+          "writable": true
+        },
+        {
+          "name": "whitelist_entry",
+          "optional": true
+        },
+        {
+          "name": "protocol_config"
+        },
+        {
+          "name": "staker_reward_ata",
+          "writable": true
+        },
+        {
+          "name": "buyback_ata",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
       ],
       "args": [
-        { "name": "amount", "type": "u64" },
-        { "name": "is_emergency", "type": "bool" }
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "is_emergency",
+          "type": "bool"
+        }
       ]
     },
     {
       "name": "propose",
-      "discriminator": [93, 253, 82, 168, 118, 33, 102, 90],
+      "discriminator": [
+        93,
+        253,
+        82,
+        168,
+        118,
+        33,
+        102,
+        90
+      ],
       "accounts": [
-        { "name": "agent", "writable": true, "signer": true },
-        { "name": "vault", "writable": true },
-        { "name": "recipient" },
-        { "name": "recipient_ata" },
-        { "name": "proposal", "writable": true },
-        { "name": "system_program", "address": "11111111111111111111111111111111" }
+        {
+          "name": "agent",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "recipient"
+        },
+        {
+          "name": "recipient_ata"
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
       ],
       "args": [
-        { "name": "amount", "type": "u64" },
-        { "name": "memo", "type": "string" }
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "memo",
+          "type": "string"
+        }
       ]
     },
     {
       "name": "approve_proposal",
-      "discriminator": [136, 108, 102, 85, 98, 114, 7, 147],
+      "discriminator": [
+        136,
+        108,
+        102,
+        85,
+        98,
+        114,
+        7,
+        147
+      ],
       "accounts": [
-        { "name": "human", "signer": true },
-        { "name": "vault" },
-        { "name": "proposal", "writable": true },
-        { "name": "vault_usdc_ata", "writable": true },
-        { "name": "recipient_ata", "writable": true },
-        { "name": "token_program", "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" }
+        {
+          "name": "human",
+          "signer": true
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        },
+        {
+          "name": "vault_usdc_ata",
+          "writable": true
+        },
+        {
+          "name": "recipient_ata",
+          "writable": true
+        },
+        {
+          "name": "protocol_config"
+        },
+        {
+          "name": "staker_reward_ata",
+          "writable": true
+        },
+        {
+          "name": "buyback_ata",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
       ],
       "args": []
     },
     {
       "name": "cancel_proposal",
-      "discriminator": [106, 74, 128, 146, 19, 65, 39, 23],
+      "discriminator": [
+        106,
+        74,
+        128,
+        146,
+        19,
+        65,
+        39,
+        23
+      ],
       "accounts": [
-        { "name": "human", "signer": true },
-        { "name": "vault" },
-        { "name": "proposal", "writable": true }
+        {
+          "name": "human",
+          "signer": true
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        }
       ],
       "args": []
     },
     {
       "name": "close_proposal",
-      "discriminator": [213, 178, 139, 19, 50, 191, 82, 245],
+      "discriminator": [
+        213,
+        178,
+        139,
+        19,
+        50,
+        191,
+        82,
+        245
+      ],
       "accounts": [
-        { "name": "agent", "writable": true, "signer": true },
-        { "name": "vault" },
-        { "name": "proposal", "writable": true }
+        {
+          "name": "agent",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "proposal",
+          "writable": true
+        }
       ],
       "args": []
     },
     {
       "name": "set_tiers",
-      "discriminator": [170, 131, 109, 175, 156, 214, 177, 121],
+      "discriminator": [
+        170,
+        131,
+        109,
+        175,
+        156,
+        214,
+        177,
+        121
+      ],
       "accounts": [
-        { "name": "human", "signer": true },
-        { "name": "vault", "writable": true }
+        {
+          "name": "human",
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        }
       ],
       "args": [
-        { "name": "tier1_max", "type": "u64" },
-        { "name": "tier2_max", "type": "u64" }
+        {
+          "name": "tier1_max",
+          "type": "u64"
+        },
+        {
+          "name": "tier2_max",
+          "type": "u64"
+        }
       ]
     },
     {
       "name": "add_whitelist",
-      "discriminator": [215, 46, 143, 176, 108, 113, 24, 1],
+      "discriminator": [
+        215,
+        46,
+        143,
+        176,
+        108,
+        113,
+        24,
+        1
+      ],
       "accounts": [
-        { "name": "human", "writable": true, "signer": true },
-        { "name": "vault" },
-        { "name": "whitelist_entry", "writable": true },
-        { "name": "system_program", "address": "11111111111111111111111111111111" }
+        {
+          "name": "human",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "whitelist_entry",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
       ],
       "args": [
-        { "name": "address", "type": "pubkey" }
+        {
+          "name": "address",
+          "type": "pubkey"
+        }
       ]
     },
     {
       "name": "remove_whitelist",
-      "discriminator": [148, 244, 73, 234, 131, 55, 247, 90],
+      "discriminator": [
+        148,
+        244,
+        73,
+        234,
+        131,
+        55,
+        247,
+        90
+      ],
       "accounts": [
-        { "name": "human", "writable": true, "signer": true },
-        { "name": "vault" },
-        { "name": "whitelist_entry", "writable": true }
+        {
+          "name": "human",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault"
+        },
+        {
+          "name": "whitelist_entry",
+          "writable": true
+        }
       ],
       "args": []
     },
     {
       "name": "pause",
-      "discriminator": [211, 22, 221, 251, 74, 121, 193, 47],
+      "discriminator": [
+        211,
+        22,
+        221,
+        251,
+        74,
+        121,
+        193,
+        47
+      ],
       "accounts": [
-        { "name": "human", "signer": true },
-        { "name": "vault", "writable": true }
+        {
+          "name": "human",
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        }
       ],
       "args": []
     },
     {
       "name": "unpause",
-      "discriminator": [169, 144, 4, 38, 10, 141, 188, 255],
+      "discriminator": [
+        169,
+        144,
+        4,
+        38,
+        10,
+        141,
+        188,
+        255
+      ],
       "accounts": [
-        { "name": "human", "signer": true },
-        { "name": "vault", "writable": true }
+        {
+          "name": "human",
+          "signer": true
+        },
+        {
+          "name": "vault",
+          "writable": true
+        }
       ],
       "args": []
+    },
+    {
+      "name": "initialize_protocol",
+      "discriminator": [
+        188,
+        233,
+        252,
+        106,
+        134,
+        146,
+        202,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "protocol_config",
+          "writable": true
+        },
+        {
+          "name": "usdc_mint"
+        },
+        {
+          "name": "tandem_mint"
+        },
+        {
+          "name": "staker_reward_ata",
+          "writable": true
+        },
+        {
+          "name": "buyback_ata"
+        },
+        {
+          "name": "stake_tandem_ata",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fee_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "stake",
+      "discriminator": [
+        206,
+        176,
+        202,
+        18,
+        200,
+        209,
+        179,
+        108
+      ],
+      "accounts": [
+        {
+          "name": "staker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "protocol_config",
+          "writable": true
+        },
+        {
+          "name": "stake_account",
+          "writable": true
+        },
+        {
+          "name": "staker_tandem_ata",
+          "writable": true
+        },
+        {
+          "name": "stake_tandem_ata",
+          "writable": true
+        },
+        {
+          "name": "staker_reward_ata"
+        },
+        {
+          "name": "tandem_mint"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "unstake",
+      "discriminator": [
+        90,
+        95,
+        107,
+        42,
+        205,
+        124,
+        50,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "staker",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "protocol_config",
+          "writable": true
+        },
+        {
+          "name": "stake_account",
+          "writable": true
+        },
+        {
+          "name": "staker_tandem_ata",
+          "writable": true
+        },
+        {
+          "name": "stake_tandem_ata",
+          "writable": true
+        },
+        {
+          "name": "staker_reward_ata"
+        },
+        {
+          "name": "tandem_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_rewards",
+      "discriminator": [
+        4,
+        144,
+        132,
+        71,
+        116,
+        23,
+        151,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "staker",
+          "signer": true
+        },
+        {
+          "name": "protocol_config",
+          "writable": true
+        },
+        {
+          "name": "stake_account",
+          "writable": true
+        },
+        {
+          "name": "staker_reward_ata",
+          "writable": true
+        },
+        {
+          "name": "staker_usdc_ata",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "update_protocol_config",
+      "discriminator": [
+        197,
+        97,
+        123,
+        54,
+        221,
+        168,
+        11,
+        135
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "signer": true
+        },
+        {
+          "name": "protocol_config",
+          "writable": true
+        },
+        {
+          "name": "buyback_ata"
+        }
+      ],
+      "args": [
+        {
+          "name": "fee_bps",
+          "type": "u16"
+        }
+      ]
     }
   ],
   "accounts": [
     {
       "name": "Vault",
-      "discriminator": [211, 8, 232, 43, 2, 152, 117, 119]
+      "discriminator": [
+        211,
+        8,
+        232,
+        43,
+        2,
+        152,
+        117,
+        119
+      ]
     },
     {
       "name": "Proposal",
-      "discriminator": [26, 94, 189, 187, 116, 136, 53, 33]
+      "discriminator": [
+        26,
+        94,
+        189,
+        187,
+        116,
+        136,
+        53,
+        33
+      ]
     },
     {
       "name": "WhitelistEntry",
-      "discriminator": [51, 70, 173, 81, 219, 192, 234, 62]
+      "discriminator": [
+        51,
+        70,
+        173,
+        81,
+        219,
+        192,
+        234,
+        62
+      ]
+    },
+    {
+      "name": "ProtocolConfig",
+      "discriminator": [
+        207,
+        91,
+        250,
+        28,
+        152,
+        179,
+        215,
+        209
+      ]
+    },
+    {
+      "name": "StakeAccount",
+      "discriminator": [
+        80,
+        158,
+        67,
+        124,
+        50,
+        189,
+        192,
+        255
+      ]
     }
   ],
   "events": [
     {
       "name": "VaultInitialized",
-      "discriminator": [180, 43, 207, 2, 18, 71, 3, 75]
+      "discriminator": [
+        180,
+        43,
+        207,
+        2,
+        18,
+        71,
+        3,
+        75
+      ]
     },
     {
       "name": "UsdcSent",
-      "discriminator": [37, 28, 211, 122, 88, 89, 161, 19]
+      "discriminator": [
+        37,
+        28,
+        211,
+        122,
+        88,
+        89,
+        161,
+        19
+      ]
     },
     {
       "name": "ProposalCreated",
-      "discriminator": [186, 8, 160, 108, 81, 13, 51, 206]
+      "discriminator": [
+        186,
+        8,
+        160,
+        108,
+        81,
+        13,
+        51,
+        206
+      ]
     },
     {
       "name": "ProposalApproved",
-      "discriminator": [70, 49, 155, 228, 157, 43, 88, 49]
+      "discriminator": [
+        70,
+        49,
+        155,
+        228,
+        157,
+        43,
+        88,
+        49
+      ]
     },
     {
       "name": "ProposalCancelled",
-      "discriminator": [253, 59, 104, 46, 129, 78, 9, 14]
+      "discriminator": [
+        253,
+        59,
+        104,
+        46,
+        129,
+        78,
+        9,
+        14
+      ]
     },
     {
       "name": "TiersUpdated",
-      "discriminator": [149, 194, 233, 237, 201, 23, 37, 225]
+      "discriminator": [
+        149,
+        194,
+        233,
+        237,
+        201,
+        23,
+        37,
+        225
+      ]
     },
     {
       "name": "WhitelistAdded",
-      "discriminator": [97, 233, 173, 159, 42, 22, 108, 250]
+      "discriminator": [
+        97,
+        233,
+        173,
+        159,
+        42,
+        22,
+        108,
+        250
+      ]
     },
     {
       "name": "WhitelistRemoved",
-      "discriminator": [57, 55, 186, 142, 33, 197, 220, 71]
+      "discriminator": [
+        57,
+        55,
+        186,
+        142,
+        33,
+        197,
+        220,
+        71
+      ]
     },
     {
       "name": "VaultPausedEvent",
-      "discriminator": [75, 189, 120, 167, 117, 229, 155, 60]
+      "discriminator": [
+        75,
+        189,
+        120,
+        167,
+        117,
+        229,
+        155,
+        60
+      ]
     },
     {
       "name": "VaultUnpausedEvent",
-      "discriminator": [131, 193, 72, 96, 27, 110, 75, 199]
+      "discriminator": [
+        131,
+        193,
+        72,
+        96,
+        27,
+        110,
+        75,
+        199
+      ]
+    },
+    {
+      "name": "ProtocolInitialized",
+      "discriminator": [
+        173,
+        122,
+        168,
+        254,
+        9,
+        118,
+        76,
+        132
+      ]
+    },
+    {
+      "name": "Staked",
+      "discriminator": [
+        11,
+        146,
+        45,
+        205,
+        230,
+        58,
+        213,
+        240
+      ]
+    },
+    {
+      "name": "Unstaked",
+      "discriminator": [
+        27,
+        179,
+        156,
+        215,
+        47,
+        71,
+        195,
+        7
+      ]
+    },
+    {
+      "name": "RewardsClaimed",
+      "discriminator": [
+        75,
+        98,
+        88,
+        18,
+        219,
+        112,
+        88,
+        121
+      ]
     }
   ],
   "errors": [
-    { "code": 6000, "name": "OnlyHuman", "msg": "Only the human authority can perform this action" },
-    { "code": 6001, "name": "OnlyAgent", "msg": "Only the agent can perform this action" },
-    { "code": 6002, "name": "OnlyAgentOrHuman", "msg": "Only the agent or human can perform this action" },
-    { "code": 6003, "name": "VaultPaused", "msg": "Vault is paused" },
-    { "code": 6004, "name": "VaultNotPaused", "msg": "Vault is not paused" },
-    { "code": 6005, "name": "InvalidThresholds", "msg": "Invalid tier thresholds" },
-    { "code": 6006, "name": "ProposalAlreadyExecuted", "msg": "Proposal has already been executed" },
-    { "code": 6007, "name": "ProposalAlreadyCancelled", "msg": "Proposal has already been cancelled" },
-    { "code": 6008, "name": "TierTooHigh", "msg": "Amount exceeds tier limit" },
-    { "code": 6009, "name": "NotEmergency", "msg": "Not an emergency transfer" },
-    { "code": 6010, "name": "AlreadyWhitelisted", "msg": "Address is already whitelisted" },
-    { "code": 6011, "name": "ZeroAmount", "msg": "Amount must be greater than zero" },
-    { "code": 6012, "name": "Overflow", "msg": "Arithmetic overflow" }
+    {
+      "code": 6000,
+      "name": "OnlyHuman",
+      "msg": "Only the human authority can perform this action"
+    },
+    {
+      "code": 6001,
+      "name": "OnlyAgent",
+      "msg": "Only the agent can perform this action"
+    },
+    {
+      "code": 6002,
+      "name": "OnlyAgentOrHuman",
+      "msg": "Only the agent or human can perform this action"
+    },
+    {
+      "code": 6003,
+      "name": "VaultPaused",
+      "msg": "Vault is paused"
+    },
+    {
+      "code": 6004,
+      "name": "VaultNotPaused",
+      "msg": "Vault is not paused"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidThresholds",
+      "msg": "Invalid tier thresholds"
+    },
+    {
+      "code": 6006,
+      "name": "ProposalAlreadyExecuted",
+      "msg": "Proposal has already been executed"
+    },
+    {
+      "code": 6007,
+      "name": "ProposalAlreadyCancelled",
+      "msg": "Proposal has already been cancelled"
+    },
+    {
+      "code": 6008,
+      "name": "TierTooHigh",
+      "msg": "Amount exceeds tier limit"
+    },
+    {
+      "code": 6009,
+      "name": "NotEmergency",
+      "msg": "Not an emergency transfer"
+    },
+    {
+      "code": 6010,
+      "name": "AlreadyWhitelisted",
+      "msg": "Address is already whitelisted"
+    },
+    {
+      "code": 6011,
+      "name": "ZeroAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6012,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6013,
+      "name": "LockupNotElapsed",
+      "msg": "7-day lockup has not elapsed"
+    },
+    {
+      "code": 6014,
+      "name": "NothingStaked",
+      "msg": "Nothing staked"
+    },
+    {
+      "code": 6015,
+      "name": "NoRewardsToClaim",
+      "msg": "No rewards to claim"
+    },
+    {
+      "code": 6016,
+      "name": "OnlyAuthority",
+      "msg": "Only the protocol authority can perform this action"
+    },
+    {
+      "code": 6017,
+      "name": "InvalidFeeBps",
+      "msg": "Fee basis points must be <= 10000"
+    }
   ],
   "types": [
     {
@@ -221,15 +1024,42 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "human", "type": "pubkey" },
-          { "name": "agent", "type": "pubkey" },
-          { "name": "usdc_mint", "type": "pubkey" },
-          { "name": "vault_usdc_ata", "type": "pubkey" },
-          { "name": "tier1_max", "type": "u64" },
-          { "name": "tier2_max", "type": "u64" },
-          { "name": "paused", "type": "bool" },
-          { "name": "proposal_count", "type": "u64" },
-          { "name": "bump", "type": "u8" }
+          {
+            "name": "human",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault_usdc_ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "tier1_max",
+            "type": "u64"
+          },
+          {
+            "name": "tier2_max",
+            "type": "u64"
+          },
+          {
+            "name": "paused",
+            "type": "bool"
+          },
+          {
+            "name": "proposal_count",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
@@ -238,16 +1068,46 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "proposal_id", "type": "u64" },
-          { "name": "recipient", "type": "pubkey" },
-          { "name": "recipient_ata", "type": "pubkey" },
-          { "name": "amount", "type": "u64" },
-          { "name": "proposed_at", "type": "i64" },
-          { "name": "executed", "type": "bool" },
-          { "name": "cancelled", "type": "bool" },
-          { "name": "memo", "type": "string" },
-          { "name": "bump", "type": "u8" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient_ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "proposed_at",
+            "type": "i64"
+          },
+          {
+            "name": "executed",
+            "type": "bool"
+          },
+          {
+            "name": "cancelled",
+            "type": "bool"
+          },
+          {
+            "name": "memo",
+            "type": "string"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
@@ -256,10 +1116,106 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "address", "type": "pubkey" },
-          { "name": "added_at", "type": "i64" },
-          { "name": "bump", "type": "u8" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "added_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProtocolConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_bps",
+            "type": "u16"
+          },
+          {
+            "name": "usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "tandem_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker_reward_ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyback_ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_per_token_stored",
+            "type": "u128"
+          },
+          {
+            "name": "total_staked",
+            "type": "u64"
+          },
+          {
+            "name": "total_rewards_claimed",
+            "type": "u64"
+          },
+          {
+            "name": "total_rewards_processed",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StakeAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "staked_amount",
+            "type": "u64"
+          },
+          {
+            "name": "reward_per_token_paid",
+            "type": "u128"
+          },
+          {
+            "name": "rewards_owed",
+            "type": "u64"
+          },
+          {
+            "name": "last_stake_ts",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
         ]
       }
     },
@@ -268,11 +1224,26 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "human", "type": "pubkey" },
-          { "name": "agent", "type": "pubkey" },
-          { "name": "tier1_max", "type": "u64" },
-          { "name": "tier2_max", "type": "u64" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "human",
+            "type": "pubkey"
+          },
+          {
+            "name": "agent",
+            "type": "pubkey"
+          },
+          {
+            "name": "tier1_max",
+            "type": "u64"
+          },
+          {
+            "name": "tier2_max",
+            "type": "u64"
+          }
         ]
       }
     },
@@ -281,10 +1252,34 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "recipient", "type": "pubkey" },
-          { "name": "amount", "type": "u64" },
-          { "name": "is_emergency", "type": "bool" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "tier",
+            "type": "u8"
+          },
+          {
+            "name": "whitelisted",
+            "type": "bool"
+          }
         ]
       }
     },
@@ -293,11 +1288,26 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "proposal_id", "type": "u64" },
-          { "name": "recipient", "type": "pubkey" },
-          { "name": "amount", "type": "u64" },
-          { "name": "memo", "type": "string" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "memo",
+            "type": "string"
+          }
         ]
       }
     },
@@ -306,10 +1316,26 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "proposal_id", "type": "u64" },
-          { "name": "recipient", "type": "pubkey" },
-          { "name": "amount", "type": "u64" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          },
+          {
+            "name": "recipient",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          }
         ]
       }
     },
@@ -318,8 +1344,14 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "proposal_id", "type": "u64" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "proposal_id",
+            "type": "u64"
+          }
         ]
       }
     },
@@ -328,9 +1360,18 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "tier1_max", "type": "u64" },
-          { "name": "tier2_max", "type": "u64" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "tier1_max",
+            "type": "u64"
+          },
+          {
+            "name": "tier2_max",
+            "type": "u64"
+          }
         ]
       }
     },
@@ -339,8 +1380,14 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "address", "type": "pubkey" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          }
         ]
       }
     },
@@ -349,8 +1396,14 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" },
-          { "name": "address", "type": "pubkey" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "address",
+            "type": "pubkey"
+          }
         ]
       }
     },
@@ -359,7 +1412,10 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          }
         ]
       }
     },
@@ -368,7 +1424,90 @@
       "type": {
         "kind": "struct",
         "fields": [
-          { "name": "vault", "type": "pubkey" }
+          {
+            "name": "vault",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ProtocolInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_bps",
+            "type": "u16"
+          },
+          {
+            "name": "usdc_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "tandem_mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Staked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_staked",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Unstaked",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "total_staked",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RewardsClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "staker",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
         ]
       }
     }

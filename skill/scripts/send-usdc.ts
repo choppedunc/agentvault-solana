@@ -1,4 +1,4 @@
-import { getProgram, getVaultAddress, getConnection, getAgentKeypair, getProgramId } from "./lib/client";
+import { getProgram, getVaultAddress, getConnection, getAgentKeypair, getProgramId, getProtocolConfigAddress } from "./lib/client";
 import { usdcToRaw, formatUsdc } from "./lib/format";
 import { getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
@@ -22,6 +22,10 @@ async function main() {
   const programId = getProgramId();
 
   const vault = await (program.account as any).vault.fetch(vaultAddress);
+
+  // Fetch protocol config for fee accounts
+  const protocolConfigAddress = getProtocolConfigAddress();
+  const protocolConfig = await (program.account as any).protocolConfig.fetch(protocolConfigAddress);
 
   // Get or create recipient ATA
   const recipientAta = await getOrCreateAssociatedTokenAccount(
@@ -76,7 +80,7 @@ async function main() {
       programId
     );
 
-    const tx = await program.methods
+    const tx = await (program.methods as any)
       .propose(new BN(rawAmount.toString()), `Send ${amount} USDC to ${recipientAddress.toBase58().slice(0, 8)}...`)
       .accounts({
         agent: agentKeypair.publicKey,
@@ -100,7 +104,7 @@ async function main() {
   }
 
   // Execute send
-  const tx = await program.methods
+  const tx = await (program.methods as any)
     .sendUsdc(new BN(rawAmount.toString()), isEmergency)
     .accounts({
       signer: agentKeypair.publicKey,
@@ -108,6 +112,9 @@ async function main() {
       vaultUsdcAta: new PublicKey(vault.vaultUsdcAta),
       recipientAta: recipientAta.address,
       whitelistEntry: whitelistEntry,
+      protocolConfig: protocolConfigAddress,
+      stakerRewardAta: new PublicKey(protocolConfig.stakerRewardAta),
+      buybackAta: new PublicKey(protocolConfig.buybackAta),
       tokenProgram: TOKEN_PROGRAM_ID,
     })
     .signers([agentKeypair])

@@ -23,6 +23,22 @@ export function getProgramId(): PublicKey {
   return new PublicKey(config.programId);
 }
 
+export function getProtocolConfigAddress(): PublicKey {
+  const [pda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("protocol_config")],
+    getProgramId()
+  );
+  return pda;
+}
+
+export function getStakeAccountAddress(staker: PublicKey): PublicKey {
+  const [pda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("stake"), staker.toBuffer()],
+    getProgramId()
+  );
+  return pda;
+}
+
 export function getProgram() {
   const connection = getConnection();
   const agentKeypair = getAgentKeypair();

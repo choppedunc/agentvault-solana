@@ -15,3 +15,7 @@ export function formatUsdc(raw: bigint | number): string {
 export function formatSol(lamports: number): string {
   return `${(lamports / 1e9).toFixed(4)} SOL`;
 }
+
+export function formatToken(raw: bigint | number, decimals: number, symbol: string): string {
+  return `${(Number(raw) / 10 ** decimals).toFixed(decimals > 4 ? 4 : 2)} ${symbol}`;
+}

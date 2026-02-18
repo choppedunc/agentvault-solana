@@ -1,5 +1,5 @@
-import { getProgram, getVaultAddress, getConnection } from "./lib/client";
-import { formatUsdc, formatSol } from "./lib/format";
+import { getProgram, getVaultAddress, getConnection, getProtocolConfigAddress } from "./lib/client";
+import { formatUsdc, formatSol, formatToken } from "./lib/format";
 import { getAccount } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 
@@ -12,7 +12,7 @@ async function main() {
   const usdcBalance = await getAccount(connection, new PublicKey(vault.vaultUsdcAta));
   const solBalance = await connection.getBalance(vaultAddress);
 
-  const result = {
+  const result: Record<string, any> = {
     vault: vaultAddress.toBase58(),
     human: vault.human.toBase58(),
     agent: vault.agent.toBase58(),
@@ -24,6 +24,22 @@ async function main() {
     usdcBalance: formatUsdc(usdcBalance.amount),
     solBalance: formatSol(solBalance),
   };
+
+  // Fetch protocol config (may not exist yet)
+  try {
+    const protocolConfigAddress = getProtocolConfigAddress();
+    const protocolConfig = await (program.account as any).protocolConfig.fetch(protocolConfigAddress);
+    result.protocol = {
+      feeBps: protocolConfig.feeBps,
+      feePercent: `${(protocolConfig.feeBps / 100).toFixed(2)}%`,
+      tandemMint: protocolConfig.tandemMint.toBase58(),
+      totalStaked: protocolConfig.totalStaked.toString(),
+      stakerRewardAta: protocolConfig.stakerRewardAta.toBase58(),
+      buybackAta: protocolConfig.buybackAta.toBase58(),
+    };
+  } catch {
+    result.protocol = "Not initialized";
+  }
 
   console.log(JSON.stringify(result, null, 2));
 }
