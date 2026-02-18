@@ -14,6 +14,7 @@ pub struct UsdcSent {
     pub signer: Pubkey,
     pub recipient: Pubkey,
     pub amount: u64,
+    pub fee: u64,
     pub tier: u8,
     pub whitelisted: bool,
 }
@@ -33,6 +34,7 @@ pub struct ProposalApproved {
     pub proposal_id: u64,
     pub recipient: Pubkey,
     pub amount: u64,
+    pub fee: u64,
 }
 
 #[event]
@@ -68,4 +70,32 @@ pub struct VaultPausedEvent {
 #[event]
 pub struct VaultUnpausedEvent {
     pub vault: Pubkey,
+}
+
+#[event]
+pub struct ProtocolInitialized {
+    pub authority: Pubkey,
+    pub fee_bps: u16,
+    pub usdc_mint: Pubkey,
+    pub tandem_mint: Pubkey,
+}
+
+#[event]
+pub struct Staked {
+    pub staker: Pubkey,
+    pub amount: u64,
+    pub total_staked: u64,
+}
+
+#[event]
+pub struct Unstaked {
+    pub staker: Pubkey,
+    pub amount: u64,
+    pub total_staked: u64,
+}
+
+#[event]
+pub struct RewardsClaimed {
+    pub staker: Pubkey,
+    pub amount: u64,
 }

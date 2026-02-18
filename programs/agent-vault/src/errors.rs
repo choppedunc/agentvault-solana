@@ -28,4 +28,14 @@ pub enum VaultError {
     ZeroAmount,
     #[msg("Arithmetic overflow")]
     Overflow,
+    #[msg("7-day lockup has not elapsed")]
+    LockupNotElapsed,
+    #[msg("Nothing staked")]
+    NothingStaked,
+    #[msg("No rewards to claim")]
+    NoRewardsToClaim,
+    #[msg("Only the protocol authority can perform this action")]
+    OnlyAuthority,
+    #[msg("Fee basis points must be <= 10000")]
+    InvalidFeeBps,
 }

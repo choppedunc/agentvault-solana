@@ -2,6 +2,7 @@ use anchor_lang::prelude::*;
 
 pub mod errors;
 pub mod events;
+pub mod helpers;
 pub mod instructions;
 pub mod state;
 
@@ -55,5 +56,25 @@ pub mod agent_vault {
 
     pub fn unpause(ctx: Context<Unpause>) -> Result<()> {
         instructions::unpause::handler(ctx)
+    }
+
+    pub fn initialize_protocol(ctx: Context<InitializeProtocol>, fee_bps: u16) -> Result<()> {
+        instructions::initialize_protocol::handler(ctx, fee_bps)
+    }
+
+    pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
+        instructions::stake::handler(ctx, amount)
+    }
+
+    pub fn unstake(ctx: Context<Unstake>) -> Result<()> {
+        instructions::unstake::handler(ctx)
+    }
+
+    pub fn claim_rewards(ctx: Context<ClaimRewards>) -> Result<()> {
+        instructions::claim_rewards::handler(ctx)
+    }
+
+    pub fn update_protocol_config(ctx: Context<UpdateProtocolConfig>, fee_bps: u16) -> Result<()> {
+        instructions::update_protocol_config::handler(ctx, fee_bps)
     }
 }

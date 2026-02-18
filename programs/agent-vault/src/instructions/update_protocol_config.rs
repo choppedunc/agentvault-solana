@@ -1,0 +1,33 @@
+use anchor_lang::prelude::*;
+use anchor_spl::token::TokenAccount;
+use crate::state::*;
+use crate::errors::*;
+
+#[derive(Accounts)]
+pub struct UpdateProtocolConfig<'info> {
+    pub authority: Signer<'info>,
+
+    #[account(
+        mut,
+        seeds = [ProtocolConfig::SEED_PREFIX],
+        bump = protocol_config.bump,
+        constraint = protocol_config.authority == authority.key() @ VaultError::OnlyAuthority,
+    )]
+    pub protocol_config: Account<'info, ProtocolConfig>,
+
+    /// New buyback ATA (optional — pass same as current if not changing)
+    #[account(
+        constraint = buyback_ata.mint == protocol_config.usdc_mint,
+    )]
+    pub buyback_ata: Account<'info, TokenAccount>,
+}
+
+pub fn handler(ctx: Context<UpdateProtocolConfig>, fee_bps: u16) -> Result<()> {
+    require!(fee_bps <= 10_000, VaultError::InvalidFeeBps);
+
+    let config = &mut ctx.accounts.protocol_config;
+    config.fee_bps = fee_bps;
+    config.buyback_ata = ctx.accounts.buyback_ata.key();
+
+    Ok(())
+}

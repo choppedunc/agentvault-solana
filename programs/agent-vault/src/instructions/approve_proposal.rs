@@ -3,6 +3,7 @@ use anchor_spl::token::{self, Token, TokenAccount, Transfer};
 use crate::state::*;
 use crate::errors::*;
 use crate::events::*;
+use crate::helpers;
 
 #[derive(Accounts)]
 pub struct ApproveProposal<'info> {
@@ -42,6 +43,27 @@ pub struct ApproveProposal<'info> {
     )]
     pub recipient_ata: Account<'info, TokenAccount>,
 
+    /// Protocol config for fee calculation
+    #[account(
+        seeds = [ProtocolConfig::SEED_PREFIX],
+        bump = protocol_config.bump,
+    )]
+    pub protocol_config: Account<'info, ProtocolConfig>,
+
+    /// Staker reward USDC ATA (receives 50% of fee)
+    #[account(
+        mut,
+        constraint = staker_reward_ata.key() == protocol_config.staker_reward_ata,
+    )]
+    pub staker_reward_ata: Account<'info, TokenAccount>,
+
+    /// Buyback USDC ATA (receives 50% of fee)
+    #[account(
+        mut,
+        constraint = buyback_ata.key() == protocol_config.buyback_ata,
+    )]
+    pub buyback_ata: Account<'info, TokenAccount>,
+
     pub token_program: Program<'info, Token>,
 }
 
@@ -72,6 +94,18 @@ pub fn handler(ctx: Context<ApproveProposal>) -> Result<()> {
     );
     token::transfer(cpi_ctx, proposal.amount)?;
 
+    // Calculate and transfer fee
+    let fee = helpers::calculate_and_transfer_fee(
+        proposal.amount,
+        ctx.accounts.protocol_config.fee_bps,
+        &ctx.accounts.vault_usdc_ata,
+        &ctx.accounts.staker_reward_ata,
+        &ctx.accounts.buyback_ata,
+        &ctx.accounts.vault.to_account_info(),
+        &ctx.accounts.token_program,
+        signer_seeds,
+    )?;
+
     proposal.executed = true;
 
     emit!(ProposalApproved {
@@ -79,6 +113,7 @@ pub fn handler(ctx: Context<ApproveProposal>) -> Result<()> {
         proposal_id: proposal.proposal_id,
         recipient: proposal.recipient,
         amount: proposal.amount,
+        fee,
     });
 
     Ok(())

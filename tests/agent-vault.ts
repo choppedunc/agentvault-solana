@@ -19,8 +19,11 @@ import {
 import BN from "bn.js";
 import * as fs from "fs";
 import * as path from "path";
+import { fileURLToPath } from "url";
 
 // Load IDL directly since generated types may not match
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const idl = JSON.parse(fs.readFileSync(path.join(__dirname, "../target/idl/agent_vault.json"), "utf-8"));
 
 describe("agent-vault", () => {
@@ -31,6 +34,7 @@ describe("agent-vault", () => {
 
   // Test accounts
   let usdcMint: PublicKey;
+  let tandemMint: PublicKey;
   let mintAuthority: Keypair;
   let human: PublicKey;
   let agent: Keypair;
@@ -40,26 +44,40 @@ describe("agent-vault", () => {
   let vaultUsdcAta: PublicKey;
   let recipientAta: PublicKey;
 
+  // Protocol accounts
+  let protocolConfig: PublicKey;
+  let stakerRewardAta: PublicKey;
+  let buybackWallet: Keypair;
+  let buybackAta: PublicKey;
+  let stakeTandemAta: PublicKey;
+
   const TIER1_MAX = new BN(50_000_000); // 50 USDC
   const TIER2_MAX = new BN(100_000_000); // 100 USDC
   const INITIAL_VAULT_BALANCE = 1_000_000_000; // 1000 USDC
+  const FEE_BPS = 25; // 0.25%
 
   before("Setup test environment", async () => {
     mintAuthority = Keypair.generate();
     agent = Keypair.generate();
     recipient = Keypair.generate();
+    buybackWallet = Keypair.generate();
     human = provider.wallet.publicKey;
 
     // Airdrop SOL
     const sig1 = await provider.connection.requestAirdrop(mintAuthority.publicKey, 10e9);
     const sig2 = await provider.connection.requestAirdrop(agent.publicKey, 10e9);
     const sig3 = await provider.connection.requestAirdrop(recipient.publicKey, 10e9);
+    const sig4 = await provider.connection.requestAirdrop(buybackWallet.publicKey, 10e9);
     await provider.connection.confirmTransaction(sig1);
     await provider.connection.confirmTransaction(sig2);
     await provider.connection.confirmTransaction(sig3);
+    await provider.connection.confirmTransaction(sig4);
 
     // Create USDC mock mint (6 decimals)
     usdcMint = await createMint(provider.connection, mintAuthority, mintAuthority.publicKey, null, 6);
+
+    // Create TANDEM mock mint (6 decimals)
+    tandemMint = await createMint(provider.connection, mintAuthority, mintAuthority.publicKey, null, 6);
 
     // Derive vault PDA
     [vault, vaultBump] = PublicKey.findProgramAddressSync(
@@ -75,7 +93,32 @@ describe("agent-vault", () => {
       provider.connection, mintAuthority, usdcMint, recipient.publicKey
     );
     recipientAta = recipientAtaAccount.address;
+
+    // Derive protocol config PDA
+    [protocolConfig] = PublicKey.findProgramAddressSync(
+      [Buffer.from("protocol_config")],
+      program.programId
+    );
+
+    // Derive protocol ATAs
+    stakerRewardAta = getAssociatedTokenAddressSync(usdcMint, protocolConfig, true);
+    stakeTandemAta = getAssociatedTokenAddressSync(tandemMint, protocolConfig, true);
+
+    // Create buyback wallet's USDC ATA
+    const buybackAtaAccount = await getOrCreateAssociatedTokenAccount(
+      provider.connection, mintAuthority, usdcMint, buybackWallet.publicKey
+    );
+    buybackAta = buybackAtaAccount.address;
   });
+
+  // Helper: common fee accounts for send_usdc
+  function feeAccounts() {
+    return {
+      protocolConfig,
+      stakerRewardAta,
+      buybackAta,
+    };
+  }
 
   it("Initializes the vault", async () => {
     await program.methods
@@ -102,6 +145,34 @@ describe("agent-vault", () => {
     expect(vaultAccount.proposalCount.toNumber()).to.equal(0);
   });
 
+  it("Initializes the protocol config", async () => {
+    await program.methods
+      .initializeProtocol(FEE_BPS)
+      .accounts({
+        authority: human,
+        protocolConfig,
+        usdcMint,
+        tandemMint,
+        stakerRewardAta,
+        buybackAta,
+        stakeTandemAta,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .rpc();
+
+    const config = await program.account.protocolConfig.fetch(protocolConfig);
+    expect(config.authority.toString()).to.equal(human.toString());
+    expect(config.feeBps).to.equal(FEE_BPS);
+    expect(config.usdcMint.toString()).to.equal(usdcMint.toString());
+    expect(config.tandemMint.toString()).to.equal(tandemMint.toString());
+    expect(config.stakerRewardAta.toString()).to.equal(stakerRewardAta.toString());
+    expect(config.buybackAta.toString()).to.equal(buybackAta.toString());
+    expect(config.totalStaked.toNumber()).to.equal(0);
+  });
+
   it("Funds the vault with USDC", async () => {
     await mintTo(provider.connection, mintAuthority, usdcMint, vaultUsdcAta, mintAuthority, INITIAL_VAULT_BALANCE);
 
@@ -109,11 +180,13 @@ describe("agent-vault", () => {
     expect(Number(balance.amount)).to.equal(INITIAL_VAULT_BALANCE);
   });
 
-  // --- Tier routing tests ---
+  // --- Tier routing tests (now with fee accounts) ---
 
-  it("Agent sends Tier 1 amount (30 USDC)", async () => {
+  it("Agent sends Tier 1 amount (30 USDC) with 0.25% fee", async () => {
     const amount = new BN(30_000_000);
-    const before = await getAccount(provider.connection, recipientAta);
+    const beforeRecipient = await getAccount(provider.connection, recipientAta);
+    const beforeStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const beforeBuyback = await getAccount(provider.connection, buybackAta);
 
     await program.methods
       .sendUsdc(amount, false)
@@ -123,13 +196,25 @@ describe("agent-vault", () => {
         vaultUsdcAta,
         recipientAta,
         whitelistEntry: null,
+        ...feeAccounts(),
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([agent])
       .rpc();
 
-    const after = await getAccount(provider.connection, recipientAta);
-    expect(Number(after.amount) - Number(before.amount)).to.equal(30_000_000);
+    const afterRecipient = await getAccount(provider.connection, recipientAta);
+    const afterStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const afterBuyback = await getAccount(provider.connection, buybackAta);
+
+    // Recipient gets exact amount
+    expect(Number(afterRecipient.amount) - Number(beforeRecipient.amount)).to.equal(30_000_000);
+
+    // Fee = 30_000_000 * 25 / 10000 = 75_000
+    // Staker half = 37_500, Buyback half = 37_500
+    const stakerFee = Number(afterStakerReward.amount) - Number(beforeStakerReward.amount);
+    const buybackFee = Number(afterBuyback.amount) - Number(beforeBuyback.amount);
+    expect(stakerFee).to.equal(37_500);
+    expect(buybackFee).to.equal(37_500);
   });
 
   it("Tier 2 without emergency flag fails (NotEmergency)", async () => {
@@ -142,6 +227,7 @@ describe("agent-vault", () => {
           vaultUsdcAta,
           recipientAta,
           whitelistEntry: null,
+          ...feeAccounts(),
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([agent])
@@ -163,6 +249,7 @@ describe("agent-vault", () => {
         vaultUsdcAta,
         recipientAta,
         whitelistEntry: null,
+        ...feeAccounts(),
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([agent])
@@ -182,6 +269,7 @@ describe("agent-vault", () => {
           vaultUsdcAta,
           recipientAta,
           whitelistEntry: null,
+          ...feeAccounts(),
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([agent])
@@ -226,8 +314,10 @@ describe("agent-vault", () => {
     expect(vaultAccount.proposalCount.toNumber()).to.equal(1);
   });
 
-  it("Human approves proposal (funds transferred)", async () => {
-    const before = await getAccount(provider.connection, recipientAta);
+  it("Human approves proposal (funds transferred + fee)", async () => {
+    const beforeRecipient = await getAccount(provider.connection, recipientAta);
+    const beforeStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const beforeBuyback = await getAccount(provider.connection, buybackAta);
 
     await program.methods
       .approveProposal()
@@ -237,12 +327,21 @@ describe("agent-vault", () => {
         proposal: proposal1Pda,
         vaultUsdcAta,
         recipientAta,
+        ...feeAccounts(),
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();
 
-    const after = await getAccount(provider.connection, recipientAta);
-    expect(Number(after.amount) - Number(before.amount)).to.equal(150_000_000);
+    const afterRecipient = await getAccount(provider.connection, recipientAta);
+    expect(Number(afterRecipient.amount) - Number(beforeRecipient.amount)).to.equal(150_000_000);
+
+    // Fee = 150_000_000 * 25 / 10000 = 375_000
+    const afterStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const afterBuyback = await getAccount(provider.connection, buybackAta);
+    const stakerFee = Number(afterStakerReward.amount) - Number(beforeStakerReward.amount);
+    const buybackFee = Number(afterBuyback.amount) - Number(beforeBuyback.amount);
+    expect(stakerFee).to.equal(187_500);
+    expect(buybackFee).to.equal(187_500);
 
     const proposal = await program.account.proposal.fetch(proposal1Pda);
     expect(proposal.executed).to.be.true;
@@ -329,6 +428,7 @@ describe("agent-vault", () => {
         vaultUsdcAta,
         recipientAta,
         whitelistEntry: whitelistPda,
+        ...feeAccounts(),
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([agent])
@@ -362,6 +462,7 @@ describe("agent-vault", () => {
           vaultUsdcAta,
           recipientAta,
           whitelistEntry: null,
+          ...feeAccounts(),
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([agent])
@@ -404,6 +505,7 @@ describe("agent-vault", () => {
           vaultUsdcAta,
           recipientAta,
           whitelistEntry: null,
+          ...feeAccounts(),
           tokenProgram: TOKEN_PROGRAM_ID,
         })
         .signers([agent])
@@ -425,6 +527,7 @@ describe("agent-vault", () => {
         vaultUsdcAta,
         recipientAta,
         whitelistEntry: null,
+        ...feeAccounts(),
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .rpc();
@@ -450,6 +553,7 @@ describe("agent-vault", () => {
         vaultUsdcAta,
         recipientAta,
         whitelistEntry: null,
+        ...feeAccounts(),
         tokenProgram: TOKEN_PROGRAM_ID,
       })
       .signers([agent])
@@ -457,5 +561,266 @@ describe("agent-vault", () => {
 
     const after = await getAccount(provider.connection, recipientAta);
     expect(Number(after.amount) - Number(before.amount)).to.equal(10_000_000);
+  });
+
+  // --- Fee precision tests ---
+
+  it("Tiny amount: fee rounds to 0, no fee transfers", async () => {
+    // 100 lamports = 0.0001 USDC. fee = 100 * 25 / 10000 = 0
+    const amount = new BN(100);
+    const beforeStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const beforeBuyback = await getAccount(provider.connection, buybackAta);
+
+    await program.methods
+      .sendUsdc(amount, false)
+      .accounts({
+        signer: agent.publicKey,
+        vault,
+        vaultUsdcAta,
+        recipientAta,
+        whitelistEntry: null,
+        ...feeAccounts(),
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([agent])
+      .rpc();
+
+    const afterStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const afterBuyback = await getAccount(provider.connection, buybackAta);
+
+    expect(Number(afterStakerReward.amount) - Number(beforeStakerReward.amount)).to.equal(0);
+    expect(Number(afterBuyback.amount) - Number(beforeBuyback.amount)).to.equal(0);
+  });
+
+  it("100 USDC send: 0.25 USDC fee (125K staker, 125K buyback)", async () => {
+    const amount = new BN(100_000_000); // 100 USDC
+    const beforeStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const beforeBuyback = await getAccount(provider.connection, buybackAta);
+
+    await program.methods
+      .sendUsdc(amount, true) // tier 2 with emergency
+      .accounts({
+        signer: agent.publicKey,
+        vault,
+        vaultUsdcAta,
+        recipientAta,
+        whitelistEntry: null,
+        ...feeAccounts(),
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([agent])
+      .rpc();
+
+    const afterStakerReward = await getAccount(provider.connection, stakerRewardAta);
+    const afterBuyback = await getAccount(provider.connection, buybackAta);
+
+    // Fee = 100_000_000 * 25 / 10000 = 250_000
+    expect(Number(afterStakerReward.amount) - Number(beforeStakerReward.amount)).to.equal(125_000);
+    expect(Number(afterBuyback.amount) - Number(beforeBuyback.amount)).to.equal(125_000);
+  });
+
+  // --- Staking tests ---
+
+  let staker: Keypair;
+  let stakerTandemAta: PublicKey;
+  let stakerUsdcAta: PublicKey;
+  let stakeAccountPda: PublicKey;
+
+  it("Setup staker with TANDEM tokens", async () => {
+    staker = Keypair.generate();
+    const sig = await provider.connection.requestAirdrop(staker.publicKey, 10e9);
+    await provider.connection.confirmTransaction(sig);
+
+    // Create staker's TANDEM ATA and mint tokens
+    const stakerTandemAccount = await getOrCreateAssociatedTokenAccount(
+      provider.connection, mintAuthority, tandemMint, staker.publicKey
+    );
+    stakerTandemAta = stakerTandemAccount.address;
+    await mintTo(provider.connection, mintAuthority, tandemMint, stakerTandemAta, mintAuthority, 1_000_000_000); // 1000 TANDEM
+
+    // Create staker's USDC ATA
+    const stakerUsdcAccount = await getOrCreateAssociatedTokenAccount(
+      provider.connection, mintAuthority, usdcMint, staker.publicKey
+    );
+    stakerUsdcAta = stakerUsdcAccount.address;
+
+    // Derive stake account PDA
+    [stakeAccountPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("stake"), staker.publicKey.toBuffer()],
+      program.programId
+    );
+  });
+
+  it("Staker deposits TANDEM tokens", async () => {
+    const stakeAmount = new BN(500_000_000); // 500 TANDEM
+
+    await program.methods
+      .stake(stakeAmount)
+      .accounts({
+        staker: staker.publicKey,
+        protocolConfig,
+        stakeAccount: stakeAccountPda,
+        stakerTandemAta,
+        stakeTandemAta,
+        stakerRewardAta,
+        tandemMint,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .signers([staker])
+      .rpc();
+
+    const stakeAccount = await program.account.stakeAccount.fetch(stakeAccountPda);
+    expect(stakeAccount.stakedAmount.toNumber()).to.equal(500_000_000);
+    expect(stakeAccount.staker.toString()).to.equal(staker.publicKey.toString());
+
+    const config = await program.account.protocolConfig.fetch(protocolConfig);
+    expect(config.totalStaked.toNumber()).to.equal(500_000_000);
+
+    // Verify TANDEM transferred
+    const stakerBalance = await getAccount(provider.connection, stakerTandemAta);
+    expect(Number(stakerBalance.amount)).to.equal(500_000_000); // 500 left
+  });
+
+  it("Staker stakes more (timer resets)", async () => {
+    const stakeAmount = new BN(200_000_000); // 200 more
+
+    await program.methods
+      .stake(stakeAmount)
+      .accounts({
+        staker: staker.publicKey,
+        protocolConfig,
+        stakeAccount: stakeAccountPda,
+        stakerTandemAta,
+        stakeTandemAta,
+        stakerRewardAta,
+        tandemMint,
+        systemProgram: SystemProgram.programId,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .signers([staker])
+      .rpc();
+
+    const stakeAccount = await program.account.stakeAccount.fetch(stakeAccountPda);
+    expect(stakeAccount.stakedAmount.toNumber()).to.equal(700_000_000); // 500 + 200
+
+    const config = await program.account.protocolConfig.fetch(protocolConfig);
+    expect(config.totalStaked.toNumber()).to.equal(700_000_000);
+  });
+
+  it("Unstake fails before 7-day lockup", async () => {
+    try {
+      await program.methods
+        .unstake()
+        .accounts({
+          staker: staker.publicKey,
+          protocolConfig,
+          stakeAccount: stakeAccountPda,
+          stakerTandemAta,
+          stakeTandemAta,
+          stakerRewardAta,
+          tandemMint,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        })
+        .signers([staker])
+        .rpc();
+      expect.fail("Should have thrown");
+    } catch (e: any) {
+      expect(e.error.errorCode.code).to.equal("LockupNotElapsed");
+    }
+  });
+
+  it("Generate fees via send_usdc, then claim rewards", async () => {
+    // Send 50 USDC to generate fees while staker is staked
+    const amount = new BN(50_000_000);
+    await program.methods
+      .sendUsdc(amount, false)
+      .accounts({
+        signer: agent.publicKey,
+        vault,
+        vaultUsdcAta,
+        recipientAta,
+        whitelistEntry: null,
+        ...feeAccounts(),
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([agent])
+      .rpc();
+
+    // Fee = 50M * 25 / 10000 = 125_000. Staker portion = 62_500
+    // Staker has 100% of stake, should get all 62_500
+
+    // Claim rewards
+    await program.methods
+      .claimRewards()
+      .accounts({
+        staker: staker.publicKey,
+        protocolConfig,
+        stakeAccount: stakeAccountPda,
+        stakerRewardAta,
+        stakerUsdcAta,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([staker])
+      .rpc();
+
+    // Verify staker received USDC rewards
+    const stakerUsdcBalance = await getAccount(provider.connection, stakerUsdcAta);
+    // Staker should have received all the staker reward portion that accumulated
+    // from all previous sends since staking
+    expect(Number(stakerUsdcBalance.amount)).to.be.greaterThan(0);
+
+    // Verify rewards_owed reset
+    const stakeAccount = await program.account.stakeAccount.fetch(stakeAccountPda);
+    expect(stakeAccount.rewardsOwed.toNumber()).to.equal(0);
+  });
+
+  it("No rewards to claim after just claiming", async () => {
+    try {
+      await program.methods
+        .claimRewards()
+        .accounts({
+          staker: staker.publicKey,
+          protocolConfig,
+          stakeAccount: stakeAccountPda,
+          stakerRewardAta,
+          stakerUsdcAta,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([staker])
+        .rpc();
+      expect.fail("Should have thrown");
+    } catch (e: any) {
+      expect(e.error.errorCode.code).to.equal("NoRewardsToClaim");
+    }
+  });
+
+  it("Update protocol config", async () => {
+    await program.methods
+      .updateProtocolConfig(50) // change to 0.50%
+      .accounts({
+        authority: human,
+        protocolConfig,
+        buybackAta,
+      })
+      .rpc();
+
+    const config = await program.account.protocolConfig.fetch(protocolConfig);
+    expect(config.feeBps).to.equal(50);
+
+    // Reset back to 25 bps
+    await program.methods
+      .updateProtocolConfig(FEE_BPS)
+      .accounts({
+        authority: human,
+        protocolConfig,
+        buybackAta,
+      })
+      .rpc();
   });
 });
